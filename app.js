@@ -4,12 +4,17 @@
 const express = require('express');
 const morgan = require('morgan');
 const { sequelize } = require('./models');
+const bodyParser = require('body-parser');
+
 
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
 // create the Express app
 const app = express();
+
+// use body parser to read requests
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
@@ -21,6 +26,12 @@ app.get('/', (req, res) => {
   });
 });
 
+// setup routes
+const user = require('./routes');
+app.use('/api/users', user);
+const courses = require('./routes/courses');
+app.use('/api/courses', courses);
+
 // send 404 if no other route matched
 app.use((req, res) => {
   res.status(404).json({
@@ -28,7 +39,7 @@ app.use((req, res) => {
   });
 });
 
-// setup a global error handler
+// // setup a global error handler
 app.use((err, req, res, next) => {
   if (enableGlobalErrorLogging) {
     console.error(`Global error handler: ${JSON.stringify(err.stack)}`);
@@ -40,19 +51,23 @@ app.use((err, req, res, next) => {
   });
 });
 
-// set our port
-app.set('port', process.env.PORT || 5000);
-
-// start listening on our port
+// connect to db and test connection
 (async () => {
   try {
+      await sequelize.sync();
       await sequelize.authenticate();
-      console.log('Connection has been established successfully');
+      console.log('Successful database connection');
   } catch(error) {
       console.log('Unable to connect to the database', error);
+      error.status = 500;
   }
 })();
 
-// const server = app.listen(app.get('port'), () => {
-//   console.log(`Express server is listening on port ${server.address().port}`);
-// });
+// set our port
+const PORT = 5000;
+app.set('port', process.env.PORT || PORT);
+
+// start listening to port
+const server = app.listen(app.get('port'), () => {
+  console.log(`Express server is listening on port ${server.address().port}`);
+});

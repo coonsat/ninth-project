@@ -21,63 +21,63 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
+    firstName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'A name is required'
+          msg: 'A first name is required'
         },
         notEmpty: {
-          msg: 'Please provide a name'
+          msg: 'Please provide a first name'
         }
       }
     },
-    username: {
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'A last name is required'
+        },
+        notEmpty: {
+          msg: 'Please provide a last name'
+        }
+      }
+    },
+    emailAddress: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: {
-        msg: 'The username you entered already exists'
+        msg: 'The email address you entered already exists.',
       },
       validate: {
         notNull: {
-          msg: 'A username is required'
+          msg: 'An email address is required.',
         },
         notEmpty: {
-          msg: 'Please provide a username'
-        }
-      }
+          msg: 'Please provide an email address.',
+        },
+        isEmail: {
+          msg: 'Email address must be formatted correctly.',
+        },
+      },
     },
     password: {
-      type: DataTypes.VIRTUAL,
-      allowNull: false,
-      unique: {
-        msg: 'A password is required'
-      },
-      notEmpty: {
-        msg: 'Please provide a password'
-      },
-      len: {
-        args: [8, 20],
-        msg: 'The password should be between 8 and 20 characters long'
-      }
-    },
-    confirmedPassword: {
       type: DataTypes.STRING,
       allowNull: false,
       set(val) {
-        if ( val === this.password ) {
-          const hashedPassword = bcrypt.hashSync(val, 10);
-          this.setDataValue('confirmedPassword', hashedPassword);
-        }
+        const hashedPassword = bcrypt.hashSync(val, 10);
+        this.setDataValue('password', hashedPassword);
       },
       validate: {
         notNull: {
-          msg: 'Both passwords must match'
-        }
-      }
-    }
-  }, {
+          msg: 'A password is required.',
+        },
+      },
+    },
+  },
+  {
     sequelize,
     modelName: 'User',
   });
