@@ -28,8 +28,8 @@ app.get('/', (req, res) => {
 
 // setup routes
 const user = require('./routes');
-app.use('/api/users', user);
 const courses = require('./routes/courses');
+app.use('/api/users', user);
 app.use('/api/courses', courses);
 
 // send 404 if no other route matched

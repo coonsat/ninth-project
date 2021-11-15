@@ -1,7 +1,7 @@
 const express = require('express');
 const Sequelize = require('sequelize');
 const router = express.Router();
-const { User } = require('../models/index');
+const { Users } = require('../models/index');
 const { asyncHandler } = require('../middleware/async-handler');
 const { authenticateUser } = require('../middleware/auth-user');
 
@@ -17,11 +17,13 @@ router.get('/', authenticateUser, asyncHandler(async (req, res) => {
     res.status(200).json(user);
 }));
 
-// Create a user -> body not being sent with postman
+// Create a user 
+// -> body not being sent with postman
 router.post('/', asyncHandler(async (req, res) => {
+
     try {
-        await User.create(req.body);
-        res.json(201).location('/').json();
+        await Users.create(req.body);
+        res.status(201).location('/').json();
     } catch (error) {
         if ( 
              error.name === 'SequelizeValidationError' ||
