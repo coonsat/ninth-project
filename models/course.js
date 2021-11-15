@@ -44,15 +44,6 @@ Courses.init({
     },
     estimatedTime: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notNull: {
-                msg: 'The estimated time must be provided'
-            },
-            notEmpty: {
-                msg: 'The estimated time cannot be empty'
-            }
-        }
     },
     materialsNeeded: {
         type: DataTypes.STRING

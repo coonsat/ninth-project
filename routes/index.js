@@ -19,8 +19,7 @@ router.get('/', authenticateUser, asyncHandler(async (req, res) => {
 
 // Create a user 
 // -> body not being sent with postman
-router.post('/', asyncHandler(async (req, res) => {
-
+router.post('/', authenticateUser, asyncHandler(async (req, res) => {
     try {
         await Users.create(req.body);
         res.status(201).location('/').json();

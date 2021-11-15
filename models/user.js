@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: {
         msg: 'The email address you entered already exists.',
-      },
+      }, //regex needed
       validate: {
         notNull: {
           msg: 'An email address is required.',

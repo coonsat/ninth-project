@@ -17,7 +17,6 @@ router.get('/', authenticateUser, asyncHandler(async (req, res) => {
         });
 
         res.status(200).json(courses);
-
     } catch (error) {
         console.log(error)
         res.status(404).json('Access denied');
@@ -53,10 +52,8 @@ router.get('/:id', authenticateUser, asyncHandler(async (req, res) => {
 // Create course. Send error message if validation triggered
 // 15.11.2021 -> no body is being received. 
 router.post('/', authenticateUser, asyncHandler(async(req, res) => {
-
     try {
         const user = req.currentUser;
-
         const Course = await Courses.create({
             title: req.body.title,
             description: req.body.description,
@@ -78,14 +75,13 @@ router.post('/', authenticateUser, asyncHandler(async(req, res) => {
     }
 }));
 
-//Update a course
+// Update a course
 router.post('/:id', authenticateUser, asyncHandler(async (req, res) => {
     try {
         const courseId = req.params.id;
         const course = await Courses.findByPk(courseId);
         course.update(req.body);
         res.status(204).json();
-
     } catch (error) {
         if ( 
             error.name === 'SequelizeValidationError' ||
@@ -103,10 +99,21 @@ router.post('/:id', authenticateUser, asyncHandler(async (req, res) => {
 router.delete('/:id', authenticateUser, asyncHandler(async (req, res) => {
     try {
         const courseId = req.params.id;
-        const course = await Courses.findByPk(courseId);
-        course.destroy(course);
-        res.status(204).json();
-
+        const course = await Courses.findByPk(courseId, {
+            include: [{
+                model: Users,
+                attributes: ['id'] 
+            }]
+        });
+        
+        // Ensure that current user is deleting his/her own course
+        const currentUser = req.currentUser.dataValues.id;
+        if (course.userId === currentUser) {
+            course.destroy(course);
+            res.status(204).json();
+        } else {
+            res.status(400).json('You are not authorised to delete this course');
+        }
     } catch (error) {
         throw error;
     }
