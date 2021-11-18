@@ -13,13 +13,11 @@ router.get('/', authenticateUser, asyncHandler(async (req, res) => {
         lastName: req.currentUser.lastName,
         emailAddress: req.currentUser.emailAddress
     };
-    console.log(user)
     res.status(200).json(user);
 }));
 
 // Create a user 
-// -> body not being sent with postman
-router.post('/', authenticateUser, asyncHandler(async (req, res) => {
+router.post('/', asyncHandler(async (req, res) => {
     try {
         await Users.create(req.body);
         res.status(201).location('/').json();

@@ -6,42 +6,40 @@ const { asyncHandler } = require('../middleware/async-handler');
 const { authenticateUser } = require('../middleware/auth-user');
 
 // Get all courses with associated user.
-router.get('/', authenticateUser, asyncHandler(async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
     try {
-        const courses = Courses.findAll({
+        const courses = await Courses.findAll({
             attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
             include: [{
                     model: Users,
                     attributes: ['id', 'firstName', 'lastName', 'emailAddress']
             }]
         });
-
         res.status(200).json(courses);
     } catch (error) {
-        console.log(error)
         res.status(404).json('Access denied');
     }
 }));
 
 // Find the course by parameter and find the associated user
-router.get('/:id', authenticateUser, asyncHandler(async (req, res) => {
+router.get('/:id', asyncHandler(async (req, res) => {
     try {
         const courseId = req.params.id;
-        const course = Course.findByPk(courseId, {
+        const course = await Courses.findByPk(courseId, {
             attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
             include: [{
-                model: User, 
+                model: Users, 
                 attributes: ['id', 'firstName', 'lastName', 'emailAddress']
                 }]
             });
-        res.json(200).json(course);
+        res.status(200).json(course);
     } catch (error) {
         if (
             error.name === 'SequelizeValidationError' ||
             error.name === 'SequelizeUniqueConstraintError'
         ) {
             const errors = error.errors.map((err) => err.message);
-            res.status(400).json({errors});
+            res.status(400).json(errors);
         } else {
             throw error;
             res.status(404).json(error);
@@ -50,7 +48,6 @@ router.get('/:id', authenticateUser, asyncHandler(async (req, res) => {
 }));
 
 // Create course. Send error message if validation triggered
-// 15.11.2021 -> no body is being received. 
 router.post('/', authenticateUser, asyncHandler(async(req, res) => {
     try {
         const user = req.currentUser;
@@ -61,7 +58,7 @@ router.post('/', authenticateUser, asyncHandler(async(req, res) => {
             materialsNeeded: req.body.materialsNeeded,
             userId: user.id
         });
-        res.status(201).location(`/courses/${course.id}`).json();
+        res.status(201).location(`/courses/${Course.id}`).json();
     } catch (error) {
         if ( 
             error.name === 'SequelizeValidationError' ||
@@ -76,12 +73,20 @@ router.post('/', authenticateUser, asyncHandler(async(req, res) => {
 }));
 
 // Update a course
-router.post('/:id', authenticateUser, asyncHandler(async (req, res) => {
+router.put('/:id', authenticateUser, asyncHandler(async (req, res) => {
     try {
         const courseId = req.params.id;
         const course = await Courses.findByPk(courseId);
-        course.update(req.body);
-        res.status(204).json();
+
+        // Ensure that current user is updating his/her own course
+        const currentUser = req.currentUser.dataValues.id;
+        if (course.userId === currentUser) {
+            await course.update(req.body);
+            res.status(204).json();
+        } else {
+            res.status(400).json({ message: 'You are not authorised to update this course' });
+        }
+
     } catch (error) {
         if ( 
             error.name === 'SequelizeValidationError' ||
@@ -112,7 +117,7 @@ router.delete('/:id', authenticateUser, asyncHandler(async (req, res) => {
             course.destroy(course);
             res.status(204).json();
         } else {
-            res.status(400).json('You are not authorised to delete this course');
+            res.status(400).json({ message: 'You are not authorised to delete this course' });
         }
     } catch (error) {
         throw error;

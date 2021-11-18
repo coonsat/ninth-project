@@ -22,6 +22,7 @@ exports.authenticateUser = async (req, res, next) => {
 
             if (authenticated) {
                 console.log(`Authentication successful for username: ${user.emailAddress}`);
+                // Add current user to request object
                 req.currentUser = user;
             } else {
                 message = `Authentication failure for username: ${user.emailAddress}`;
