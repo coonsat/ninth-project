@@ -77,14 +77,18 @@ router.put('/:id', authenticateUser, asyncHandler(async (req, res) => {
     try {
         const courseId = req.params.id;
         const course = await Courses.findByPk(courseId);
-
+        
         // Ensure that current user is updating his/her own course
         const currentUser = req.currentUser.dataValues.id;
-        if (course.userId === currentUser) {
-            await course.update(req.body);
-            res.status(204).json();
+        if (course) {
+            if (course.userId === currentUser) {
+                await course.update(req.body);
+                res.status(204).json();
+            } else {
+                res.status(400).json({ message: 'You are not authorised to update this course' });
+            }
         } else {
-            res.status(400).json({ message: 'You are not authorised to update this course' });
+            res.status(404).json({ message: 'The course does not exist' });
         }
 
     } catch (error) {
