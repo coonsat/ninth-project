@@ -31,7 +31,7 @@ Courses.init({
         },
     },
     description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         validate: {
             notNull: {
