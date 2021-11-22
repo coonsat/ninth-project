@@ -20,7 +20,7 @@ router.get('/', authenticateUser, asyncHandler(async (req, res) => {
 router.post('/', asyncHandler(async (req, res) => {
     try {
         await Users.create(req.body);
-        res.status(201).location('/').json();
+        res.status(201).location('/').end();
     } catch (error) {
         if ( 
              error.name === 'SequelizeValidationError' ||
