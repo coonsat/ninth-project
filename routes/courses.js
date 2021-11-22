@@ -83,9 +83,9 @@ router.put('/:id', authenticateUser, asyncHandler(async (req, res) => {
         if (course) {
             if (course.userId === currentUser) {
                 await course.update(req.body);
-                res.status(204).json();
+                res.status(204).location(`/courses/${course.id}`).json();
             } else {
-                res.status(400).json({ message: 'You are not authorised to update this course' });
+                res.status(403).json({ message: 'You are not authorised to update this course' });
             }
         } else {
             res.status(404).json({ message: 'The course does not exist' });
@@ -121,7 +121,7 @@ router.delete('/:id', authenticateUser, asyncHandler(async (req, res) => {
             course.destroy(course);
             res.status(204).json();
         } else {
-            res.status(400).json({ message: 'You are not authorised to delete this course' });
+            res.status(403).json({ message: 'You are not authorised to delete this course' });
         }
     } catch (error) {
         throw error;
