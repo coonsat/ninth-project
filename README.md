@@ -6,7 +6,7 @@ This API will provide a way to administer a school database containing informati
 ## Getting Started
 In order to use this API you will need to complete these steps from the root folder:
 
-## Install Project Dependencies: npm install
+Install Project Dependencies: npm install
 Populate the database by using: npm run seed
 To run the API use: npm start
 To access the API, browse to the URL http://localhost:5000/.
